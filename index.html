@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>태양계 행성 합치기 게임</title>
+    <!-- Tone.js 라이브러리 추가 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <style>
+        /* CSS styles for the game */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a4a 30%, #2d1b69 70%, #4a0e5e 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            font-size: 16px;
+            touch-action: manipulation; /* 터치 액션 기본 동작 방지 */
+            -webkit-touch-callout: none; /* iOS에서 길게 눌러서 메뉴 나타나는 것 방지 */
+            -webkit-user-select: none; /* 텍스트 선택 방지 */
+            user-select: none; /* 텍스트 선택 방지 */
+            animation: cosmicPulse 10s ease-in-out infinite;
+            margin: 0;
+            padding: 0;
+        }
+
+        @keyframes cosmicPulse {
+            0%, 100% { background: linear-gradient(135deg, #0a0a1a 0%, #1a1a4a 30%, #2d1b69 70%, #4a0e5e 100%); }
+            50% { background: linear-gradient(135deg, #1a0a2a 0%, #2a1a5a 30%, #3d2b79 70%, #5a1e6e 100%); }
+        }
+        
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        .shooting-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: linear-gradient(45deg, transparent, #fff, transparent);
+            border-radius: 50%;
+            animation: shootingStar 4s linear infinite;
+        }
+
+        @keyframes shootingStar {
+            0% {
+                transform: translateX(-100vw) translateY(100vh);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100vw) translateY(-100vh);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .nebula {
+            position: fixed;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: -1;
+            animation: floatNebula 20s ease-in-out infinite;
+        }
+
+        .nebula:nth-child(1) {
+            background: radial-gradient(circle, rgba(255, 107, 53, 0.1) 0%, transparent 70%);
+            top: 10%;
+            left: 10%;
+        }
+
+        .nebula:nth-child(2) {
+            background: radial-gradient(circle, rgba(74, 144, 226, 0.1) 0%, transparent 70%);
+            top: 60%;
+            right: 10%;
+            animation-delay: -10s;
+        }
+
+        @keyframes floatNebula {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(20px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, -10px) scale(0.9); }
+        }
+        
+        h1 {
+            margin: 20px 0;
+            text-align: center;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #ffd700, #ff6b35, #ffd700);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { 
+                background-position: 0% 50%;
+                text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            }
+            50% { 
+                background-position: 100% 50%;
+                text-shadow: 0 0 40px rgba(255, 107, 53, 0.9);
+            }
+        }
+        
+        .main-content-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 2rem;
+            width: 95%;
+            max-width: 1200px;
+            margin: 0;
+        }
+        
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .right-column {
+            flex: 1;
+        }
+
+        .game-info {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .score, .next-planet {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.75rem 1.25rem;
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .game-container {
+            position: relative;
+            border: 3px solid #4a90e2;
+            border-radius: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 
+                0 0 40px rgba(74, 144, 226, 0.6),
+                inset 0 0 30px rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 4 / 6; /* 캔버스 비율 유지 */
+        }
+        
+        #gameCanvas {
+            display: block;
+            background: transparent;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            touch-action: none; /* 캔버스 내 터치 스크롤 방지 */
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        .controls {
+            margin-top: 1.5rem;
+            text-align: center;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4a90e2, #357abd);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.6);
+        }
+        
+        button:active {
+            transform: translateY(-1px);
+        }
+        
+        .planet-guide {
+            margin-top: 0;
+            text-align: center;
+            opacity: 0.9;
+            max-width: 500px;
+            line-height: 1.5;
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .planet-guide h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ffd700, #ff6b35);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .planet-guide p {
+            margin-bottom: 0.5rem;
+        }
+        
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: center;
+            display: none; /* 초기에는 숨김 */
+            z-index: 1000;
+            width: 90%;
+            max-width: 400px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.4);
+        }
+        
+        .game-over h2 {
+            color: #ff6b35;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+            text-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+        }
+
+        .ranking {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            margin-top: 1rem;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .ranking h3 {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #ffd700;
+            font-size: 1.3rem;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .ranking-table {
+            width: 100%;
+            max-width: 400px;
+            margin: 1rem auto;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        .ranking-table th, .ranking-table td {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .ranking-table thead th {
+            background-color: rgba(255, 255, 255, 0.15);
+            text-align: center;
+        }
+
+        .ranking-table tbody tr.new-record {
+            background: rgba(255, 215, 0, 0.2);
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            animation: recordGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes recordGlow {
+            from { box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+            to { box-shadow: 0 0 25px rgba(255, 215, 0, 0.8); }
+        }
+
+        .rank-number {
+            font-weight: bold;
+            color: #4a90e2;
+        }
+
+        .rank-score {
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .rank-date {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .no-records {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+            padding: 2rem;
+        }
+
+        .guide-table {
+            width: 100%;
+            max-width: 400px;
+            margin: 1rem auto;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+        
+        .guide-table th, .guide-table td {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .guide-table thead th {
+            background-color: rgba(255, 255, 255, 0.15);
+            text-align: center;
+        }
+
+        .power-up {
+            position: absolute;
+            font-size: 20px;
+            pointer-events: none;
+            z-index: 100;
+            animation: powerUpFloat 2s ease-out forwards;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        }
+
+        @keyframes powerUpFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) scale(1.5);
+            }
+        }
+
+        .achievements {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 1rem;
+            border-radius: 10px;
+            display: none;
+            z-index: 1001;
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            animation: achievementSlide 3s ease-in-out forwards; /* forwards 추가 */
+        }
+
+        @keyframes achievementSlide {
+            0% { transform: translateX(100%); opacity: 0; }
+            15%, 85% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+
+        .achievement-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .achievement-icon {
+            font-size: 2em;
+        }
+
+        .achievement-text {
+            color: #ffd700;
+            font-weight: bold;
+        }
+        
+        /* 모바일 환경을 위한 반응형 디자인 */
+        @media (max-width: 900px) {
+            h1 { font-size: 2rem; }
+            .main-content-wrapper {
+                flex-direction: column;
+                align-items: center;
+                gap: 1.5rem;
+                margin: 0;
+            }
+            .left-column, .right-column {
+                width: 95%;
+            }
+            .game-info {
+                font-size: 1rem;
+                margin-bottom: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .controls {
+                margin-top: 1rem;
+            }
+            button {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.9rem;
+            }
+            .planet-guide {
+                margin-top: 1rem;
+                padding: 1rem;
+            }
+            .achievements {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    <div class="nebula"></div>
+    <div class="nebula"></div>
+    
+    <h1>🌟 태양계 행성 합치기 🌌</h1>
+    
+    <div class="achievements" id="achievements">
+        <div class="achievement-content">
+            <div class="achievement-icon" id="achievementIcon">🏆</div>
+            <div class="achievement-text" id="achievementText">달성!</div>
+        </div>
+    </div>
+    
+    <div class="main-content-wrapper">
+        <div class="left-column">
+            <div class="game-info">
+                <div class="score">점수: <span id="score">0</span></div>
+                <div class="next-planet">다음: <span id="nextPlanet">⚫</span></div>
+            </div>
+            
+            <div class="game-container">
+                <canvas id="gameCanvas"></canvas>
+                <!-- 게임 오버 메시지를 보여줄 div -->
+                <div class="game-over" id="gameOverModal">
+                    <h2 id="gameOverTitle">게임 오버!</h2>
+                    <p>최종 점수: <span id="finalScore">0</span></p>
+                    <button onclick="restartGame()">새 게임</button>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <!-- "행성 떨어뜨리기" 버튼 제거됨 -->
+                <button onclick="restartGame()">새 게임</button>
+                <!-- 사운드 토글 버튼 추가 -->
+                <button id="soundToggleButton" onclick="toggleMute()">🎵 사운드 켜기</button>
+            </div>
+        </div>
+        
+        <div class="right-column">
+            <div class="ranking">
+                <h3>🏆 최고 기록</h3>
+                <div id="rankingContainer">
+                    <div class="no-records">아직 기록이 없습니다</div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <button onclick="clearRankings()" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">기록 초기화</button>
+                </div>
+            </div>
+            
+            <div class="planet-guide">
+                <h3 style="margin-bottom: 10px;">🚀 진화 순서 (지구 대비 크기 순)</h3>
+                <table class="guide-table">
+                    <thead>
+                        <tr>
+                            <th>순서</th>
+                            <th>행성</th>
+                            <th>지구 대비 크기</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>⚫ 세레스</td><td>약 0.08배</td></tr>
+                        <tr><td>2</td><td>🧊 명왕성</td><td>약 0.18배</td></tr>
+                        <tr><td>3</td><td>💎 트리톤</td><td>약 0.21배</td></tr>
+                        <tr><td>4</td><td>🌕 달</td><td>약 0.27배</td></tr>
+                        <tr><td>5</td><td>⚪ 수성</td><td>약 0.38배</td></tr>
+                        <tr><td>6</td><td>🔴 화성</td><td>약 0.53배</td></tr>
+                        <tr><td>7</td><td>🟡 금성</td><td>약 0.95배</td></tr>
+                        <tr><td>8</td><td>🌍 지구</td><td>약 1.00배</td></tr>
+                        <tr><td>9</td><td>🔵 해왕성</td><td>약 3.88배</td></tr>
+                        <tr><td>10</td><td>🔮 천왕성</td><td>약 4.01배</td></tr>
+                        <tr><td>11</td><td>🪐 토성</td><td>약 9.45배</td></tr>
+                        <tr><td>12</td><td>🌀 목성</td><td>약 11.2배</td></tr>
+                        <tr><td>13</td><td>☀️ 태양</td><td>약 109배</td></tr>
+                    </tbody>
+                </table>
+                <div style="margin-top: 1rem; font-size: 0.9rem; color: rgba(255, 255, 255, 0.8);">
+                    <p>🎯 <strong>목표:</strong> 태양을 만들어보세요!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // ----- 기본 요소 가져오기 -----
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const gameContainer = document.querySelector('.game-container'); // 캔버스 컨테이너
+    const gameOverModal = document.getElementById('gameOverModal');
+    const gameOverTitle = document.getElementById('gameOverTitle');
+    const finalScore = document.getElementById('finalScore');
+    const scoreElement = document.getElementById('score');
+    const nextPlanetElement = document.getElementById('nextPlanet');
+    const achievementsElement = document.getElementById('achievements');
+    const achievementIcon = document.getElementById('achievementIcon');
+    const achievementText = document.getElementById('achievementText');
+    const rankingContainer = document.getElementById('rankingContainer');
+    const soundToggleButton = document.getElementById('soundToggleButton');
+
+    // ----- 게임 설정 및 상태 변수 -----
+    let score = 0;
+    let gameRunning = true;
+    let dropX = 0; // 마지막 설정된 드롭 위치
+    let planets = [];
+    let currentPlanet = null; // 현재 떨어뜨릴 행성
+    let nextPlanetType = 0; // 다음 행성 타입
+    let rankings = []; // 랭킹 데이터 저장
+    let achievementsUnlocked = {}; // 달성한 업적 저장
+    let powerUps = []; // 점수 표시 텍스트 등 일시적인 효과 관리
+    
+    // 게임 오버 라인 (캔버스 상단에서 Y축 위치)
+    const gameOverLineY = 80;
+    let gameOverStartTime = null; // 게임오버 조건 시작 시간 
+    const gameOverDelay = 3000; // 3초 동안 행성이 라인 위에 있으면 게임 오버
+
+    // 물리 상수들
+    const GRAVITY = 0.25; // 중력
+    const AIR_RESISTANCE = 1.0; // 공기 저항 (1.0은 저항 없음)
+    const GROUND_FRICTION = 0.9; // 바닥 마찰을 높여 수평 이동을 줄임
+    const BOUNCE_DAMPING = 0.01; // 튕김 감쇠를 더 높여 충돌 시 속도 손실을 늘림 (더 적게 튕기도록)
+    const MIN_VELOCITY_THRESHOLD = 0.5; // 최소 속도 임계값 (더 빨리 멈추도록)
+    const SLEEP_THRESHOLD = 0.5; // 수면 임계값 (더 빨리 수면 모드 진입하도록)
+
+    // ----- 행성 데이터 (fontSize 수정됨) -----
+    const planetTypes = [
+        { size: 15, emoji: '⚫', name: '세레스', points: 1, fontSize: 33, color: '#666666' },
+        { size: 18, emoji: '�', name: '명왕성', points: 2, fontSize: 40, color: '#87ceeb' },
+        { size: 21, emoji: '💎', name: '트리톤', points: 3, fontSize: 46, color: '#b0e0e6' },
+        { size: 24, emoji: '🌕', name: '달', points: 4, fontSize: 53, color: '#f5f5dc' },
+        { size: 27, emoji: '⚪', name: '수성', points: 5, fontSize: 60, color: '#c0c0c0' },
+        { size: 33, emoji: '🔴', name: '화성', points: 6, fontSize: 73, color: '#cd5c5c' },
+        { size: 42, emoji: '🟡', name: '금성', points: 8, fontSize: 92, color: '#ffd700' },
+        { size: 45, emoji: '🌍', name: '지구', points: 10, fontSize: 99, color: '#4169e1' },
+        { size: 75, emoji: '🔵', name: '해왕성', points: 20, fontSize: 165, color: '#4169e1' },
+        { size: 78, emoji: '🔮', name: '천왕성', points: 25, fontSize: 172, color: '#40e0d0' },
+        { size: 97.5, emoji: '🪐', name: '토성', points: 30, fontSize: 215, color: '#fad5a5' },
+        { size: 112.5, emoji: '🌀', name: '목성', points: 50, fontSize: 248, color: '#daa520' },
+        { size: 150, emoji: '☀️', name: '태양', points: 100, fontSize: 330, color: '#ffa500' }
+    ];
+
+    // 업적 정의 (콤보 업적 제거)
+    const achievementDefinitions = [
+        { id: 'first_merge', name: '첫 합체', description: '첫 번째 행성 합체', icon: '🎉', trigger: (data) => data.totalMerges >= 1 },
+        { id: 'reach_earth', name: '지구 도달', description: '지구까지 진화', icon: '🌍', trigger: (data) => data.highestPlanet >= 7 },
+        { id: 'score_10k', name: '1만점 돌파', description: '10,000점 달성', icon: '💎', trigger: (data) => data.score >= 10000 },
+        { id: 'reach_jupiter', name: '목성 정복', description: '목성까지 진화', icon: '🌀', trigger: (data) => data.highestPlanet >= 11 },
+        { id: 'reach_sun', name: '태양 창조자', description: '태양을 만듦', icon: '☀️', trigger: (data) => data.highestPlanet >= 12 }
+    ];
+
+    let gameStats = {
+        totalMerges: 0,
+        highestPlanet: 0, // planetTypes 배열의 인덱스
+        score: 0
+    };
+
+    // Tone.js 사운드 관련 변수 선언 및 초기화
+    let dropSynth;
+    let mergeSynth;
+    let gameOverSynth;
+    let isMuted = false; // 사운드 음소거 상태
+
+    // 사운드 초기화 함수
+    function initAudio() {
+        // Tone.start()는 사용자 제스처(클릭 등) 이후에 호출되어야 합니다.
+        // 게임 시작 시 호출될 수 있도록 이벤트 리스너에 연결합니다.
+        
+        dropSynth = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: "sine" },
+            envelope: { attack: 0.01, decay: 0.1, sustain: 0.05, release: 0.1 },
+            volume: -10
+        }).toDestination();
+
+        mergeSynth = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: "triangle" },
+            envelope: { attack: 0.02, decay: 0.2, sustain: 0.1, release: 0.3 },
+            volume: -8
+        }).toDestination();
+
+        gameOverSynth = new Tone.Synth({
+            oscillator: { type: "square" },
+            envelope: { attack: 0.05, decay: 0.5, sustain: 0.1, release: 1.0 },
+            volume: -5
+        }).toDestination();
+
+        Tone.Transport.start(); // Tone.Transport는 사운드 재생에 필요하므로 유지
+    }
+
+    // 사운드 재생 함수들
+    function playDropSound() {
+        if (!isMuted) {
+            dropSynth.triggerAttackRelease("C5", "16n");
+        }
+    }
+
+    function playMergeSound() {
+        if (!isMuted) {
+            mergeSynth.triggerAttackRelease(["E4", "G4", "C5"], "8n");
+        }
+    }
+
+    function playGameOverSound() {
+        if (!isMuted) {
+            gameOverSynth.triggerAttackRelease("C2", "1n");
+        }
+    }
+
+    // 사운드 음소거/해제 토글 함수
+    function toggleMute() {
+        isMuted = !isMuted;
+        if (isMuted) {
+            Tone.Destination.mute = true;
+            soundToggleButton.textContent = '🔇 사운드 켜기';
+        } else {
+            Tone.Destination.mute = false;
+            soundToggleButton.textContent = '🎵 사운드 끄기';
+        }
+    }
+
+    // Planet 클래스 정의
+    class Planet {
+        constructor(x, y, type) {
+            this.x = x;
+            this.y = y;
+            this.type = type;
+
+            const proto = planetTypes[type];
+            this.size = proto.size;
+            this.emoji = proto.emoji;
+            this.fontSize = proto.fontSize;
+            this.points = proto.points;
+            this.color = proto.color;
+            
+            this.vx = 0;
+            this.vy = 0;
+            this.merged = false; // 합체되었는지 여부
+            this.sleeping = false; // 거의 정지 상태인지 여부
+            this.sleepTimer = 0; // 수면 상태 진입을 위한 타이머
+            this.onGround = false; // 바닥에 닿아 있는지 여부
+            this.glowIntensity = 0; // 충돌 시 글로우 효과 강도
+            this.pulsePhase = Math.random() * Math.PI * 2; // 펄스 애니메이션 위상
+        }
+
+        update() {
+            if (this.merged || this.sleeping) return;
+            
+            // 중력 적용
+            this.vy += GRAVITY;
+            
+            // 공기 저항 (사용자 설정에 따라 1.0 유지)
+            this.vx *= AIR_RESISTANCE; 
+            this.vy *= AIR_RESISTANCE; 
+            
+            // 바닥에 있을 때 마찰 적용
+            if (this.onGround) {
+                this.vx *= GROUND_FRICTION;
+                // 바닥에서 거의 멈췄을 때 완전히 정지
+                if (Math.abs(this.vx) < MIN_VELOCITY_THRESHOLD) {
+                    this.vx = 0;
+                }
+            }
+            
+            // 위치 업데이트
+            this.x += this.vx;
+            this.y += this.vy;
+            
+            // 글로우 효과 업데이트 (점점 사라지게)
+            this.glowIntensity = Math.max(0, this.glowIntensity - 0.02);
+            
+            // 수면 상태 체크
+            const speed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+            if (speed < SLEEP_THRESHOLD && this.onGround) {
+                this.sleepTimer++;
+                if (this.sleepTimer > 30) { // 일정 시간 이상 정지 상태면 수면 모드
+                    this.sleeping = true;
+                    this.vx = 0;
+                    this.vy = 0;
+                }
+            } else {
+                this.sleepTimer = 0;
+            }
+        }
+
+        handleBoundaryCollision() {
+            if (this.merged) return;
+            
+            this.onGround = false; // 매 프레임마다 바닥 상태 초기화
+            
+            // 바닥 충돌
+            if (this.y + this.size >= canvas.height) {
+                this.y = canvas.height - this.size;
+                this.onGround = true;
+                if (this.vy > MIN_VELOCITY_THRESHOLD) {
+                    this.vy *= -BOUNCE_DAMPING; // 튕김 감쇠
+                    this.glowIntensity = 0.5; // 충돌시 글로우
+                } else {
+                    this.vy = 0;
+                }
+            }
+            
+            // 천장 충돌 (게임 오버 라인 위쪽은 충돌 처리 안 함, 게임 오버 로직이 담당)
+            if (this.y - this.size <= 0) {
+                this.y = this.size;
+                if (this.vy < 0) {
+                    this.vy *= -BOUNCE_DAMPING;
+                    this.glowIntensity = 0.5;
+                }
+            }
+            
+            // 왼쪽 벽 충돌
+            if (this.x - this.size < 0) { 
+                this.x = this.size;
+                if (this.vx < 0) { // 벽을 뚫고 들어가려는 속도가 있을 때만 반사
+                    this.vx *= -BOUNCE_DAMPING;
+                    this.glowIntensity = 0.5;
+                } else { // 뚫고 들어가려는 속도가 없으면 그냥 멈춤
+                    this.vx = 0;
+                }
+            }
+            
+            // 오른쪽 벽 충돌
+            if (this.x + this.size > canvas.width) { 
+                this.x = canvas.width - this.size;
+                if (this.vx > 0) { // 벽을 뚫고 들어가려는 속도가 있을 때만 반사
+                    this.vx *= -BOUNCE_DAMPING;
+                    this.glowIntensity = 0.5;
+                } else { // 뚫고 들어가려는 속도가 없으면 그냥 멈춤
+                    this.vx = 0;
+                }
+            }
+        }
+        
+        // 두 행성 간의 충돌 해결
+        resolveCollision(other) {
+            if (this.merged || other.merged) return false;
+
+            const dx = this.x - other.x;
+            const dy = this.y - other.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const minDistance = this.size + other.size;
+
+            if (distance < minDistance) { 
+                // 합체 체크 - 같은 타입이면 바로 합체
+                if (this.type === other.type && this.type < planetTypes.length - 1) {
+                    this.merge(other);
+                    return true; // 합체가 발생했음을 알림
+                }
+
+                // 충돌 처리 (다른 타입일 때만)
+                // 겹침을 완전히 제거하기 위해 정확한 overlap 값 사용
+                // 겹침이 발생하면 최소한 1픽셀 이상 확실히 분리되도록 조정
+                const overlap = minDistance - distance + 1.0; 
+                const normalX = dx / distance;
+                const normalY = dy / distance;
+                
+                // 위치 분리 (50:50으로 각 행성을 이동)
+                const separationX = normalX * overlap * 0.5;
+                const separationY = normalY * overlap * 0.5;
+                
+                this.x += separationX;
+                this.y += separationY;
+                other.x -= separationX;
+                other.y -= separationY;
+                
+                // 속도 반사 (간단한 탄성 충돌)
+                const relativeVelocityX = this.vx - other.vx;
+                const relativeVelocityY = this.vy - other.vy;
+                const separationVelocity = relativeVelocityX * normalX + relativeVelocityY * normalY;
+                
+                // 이미 멀어지고 있는 경우 충돌 처리 안 함
+                if (separationVelocity > 0) {
+                    return false; 
+                }
+                
+                const bounceVelocity = separationVelocity * BOUNCE_DAMPING;
+                this.vx -= bounceVelocity * normalX;
+                this.vy -= bounceVelocity * normalY;
+                other.vx += bounceVelocity * normalX;
+                other.vy += bounceVelocity * normalY;
+                
+                // 충돌 글로우 효과
+                this.glowIntensity = Math.max(this.glowIntensity, 0.3);
+                other.glowIntensity = Math.max(other.glowIntensity, 0.3);
+                
+                // 수면 상태 해제
+                this.sleeping = false;
+                other.sleeping = false;
+                this.sleepTimer = 0;
+                other.sleepTimer = 0;
+            }
+            
+            return false; // 합체가 발생하지 않았음을 알림
+        }
+
+        // 행성 합체 로직
+        merge(other) {
+            // 이미 합체되었거나 게임이 종료된 경우 처리하지 않음
+            if (this.type >= planetTypes.length - 1 || !gameRunning) return;
+            
+            // 두 행성을 합체 상태로 표시
+            this.merged = true;
+            other.merged = true;
+
+            const newType = this.type + 1; // 다음 단계 행성 타입
+            const newX = (this.x + other.x) / 2; // 합체될 위치 (두 행성의 중간)
+            const newY = Math.min(this.y, other.y) - 10; // 합체될 위치 (위쪽으로 약간 이동)
+            const newPlanet = new Planet(newX, newY, newType); // 새로운 행성 생성
+            
+            // 점수 계산 (콤보 보너스 제거, 기본 점수만 추가)
+            const bonusPoints = planetTypes[newType].points;
+            
+            score += bonusPoints;
+            gameStats.score = score; // 게임 통계 점수 업데이트
+            gameStats.totalMerges++; // 총 합체 횟수 증가
+            gameStats.highestPlanet = Math.max(gameStats.highestPlanet, newType); // 가장 높은 행성 타입 업데이트
+            
+            updateScore(); // 점수 UI 업데이트
+            
+            // 강화된 머지 이펙트 생성
+            createEnhancedMergeEffect(newX, newY, newType);
+            
+            // 파워업 텍스트 표시 (획득 점수 표시)
+            showPowerUp(newX, newY, `+${bonusPoints}`);
+            
+            planets.push(newPlanet); // 새로운 행성을 행성 목록에 추가
+            
+            // 합체 사운드 재생
+            playMergeSound();
+            
+            // 업적 체크
+            checkAchievements();
+            
+            // 마지막 행성 (태양)을 만들면 게임 종료 (승리)
+            if (newType === planetTypes.length - 1) {
+                setTimeout(() => endGame(true), 1000); // 1초 후 게임 승리 처리
+            }
+        }
+
+        // 행성 그리기
+        draw() {
+            if (this.merged) return; // 합체된 행성은 그리지 않음
+            
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            
+            // 글로우 효과 (충돌 시 또는 큰 행성)
+            if (this.glowIntensity > 0 || this.type >= 7) {
+                const glowRadius = this.size + 10;
+                const gradient = ctx.createRadialGradient(0, 0, this.size * 0.5, 0, 0, glowRadius);
+                const alpha = this.glowIntensity + (this.type >= 7 ? 0.2 : 0); // 큰 행성은 기본 글로우
+                gradient.addColorStop(0, `${this.color}00`); // 중심은 투명
+                gradient.addColorStop(1, `${this.color}${Math.floor(alpha * 64).toString(16).padStart(2, '0')}`); // 바깥은 색상 + 알파
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(0, 0, glowRadius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // 행성 이모지 그리기
+            ctx.font = `${this.fontSize}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(this.emoji, 0, 0);
+            ctx.restore();
+        }
+    }
+    
+    // 파티클 효과 관리 배열
+    let particles = [];
+    
+    // 강화된 합체 이펙트 생성 함수
+    function createEnhancedMergeEffect(x, y, planetType) {
+        const color = planetTypes[planetType].color;
+        const particleCount = Math.min(25, 10 + planetType * 2); // 행성 타입에 따라 파티클 수 증가
+        
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x, y,
+                vx: (Math.random() - 0.5) * 12, // 랜덤한 속도
+                vy: (Math.random() - 0.5) * 12,
+                life: 45, maxLife: 45, // 파티클 수명
+                color: color,
+                size: Math.random() * 4 + 2, // 랜덤한 크기
+                type: 'merge',
+                sparkle: Math.random() > 0.7 // 반짝임 효과 여부
+            });
+        }
+        
+        // 특별한 효과 (큰 행성일 때)
+        if (planetType >= 8) { // 해왕성 이상부터 추가 별 파티클
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                particles.push({
+                    x, y,
+                    vx: Math.cos(angle) * 6,
+                    vy: Math.sin(angle) * 6,
+                    life: 60, maxLife: 60,
+                    color: '#ffd700', // 황금색 별
+                    size: 6,
+                    type: 'star',
+                    sparkle: true
+                });
+            }
+        }
+    }
+    
+    // 파티클 업데이트
+    function updateParticles() {
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.1; // 파티클에도 약간의 중력 적용
+            p.life--;
+            p.size *= 0.98; // 파티클 크기 감소
+
+            if (p.life <= 0 || p.size < 0.5) {
+                particles.splice(i, 1); // 수명이 다하거나 너무 작아지면 제거
+            }
+        }
+    }
+
+    // 파티클 그리기
+    function drawParticles() {
+        particles.forEach(p => {
+            ctx.save();
+            ctx.globalAlpha = p.life / p.maxLife; // 수명에 따라 투명도 조절
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            if (p.sparkle) {
+                // 반짝이는 별 모양
+                ctx.moveTo(p.x, p.y - p.size);
+                ctx.lineTo(p.x + p.size * 0.6, p.y - p.size * 0.6);
+                ctx.lineTo(p.x + p.size, p.y);
+                ctx.lineTo(p.x + p.size * 0.6, p.y + p.size * 0.6);
+                ctx.lineTo(p.x, p.y + p.size);
+                ctx.lineTo(p.x - p.size * 0.6, p.y + p.size * 0.6);
+                ctx.lineTo(p.x - p.size, p.y);
+                ctx.lineTo(p.x - p.size * 0.6, p.y - p.size * 0.6);
+                ctx.closePath();
+            } else {
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            }
+            ctx.fill();
+            ctx.restore();
+        });
+    }
+
+    // 점수 표시 업데이트
+    function updateScore() {
+        scoreElement.textContent = score;
+    }
+
+    // 다음 행성 업데이트
+    function updateNextPlanetDisplay() {
+        nextPlanetElement.textContent = planetTypes[nextPlanetType].emoji;
+    }
+
+    // 파워업 텍스트 표시 (점수 획득 시)
+    function showPowerUp(x, y, text) {
+        const powerUpDiv = document.createElement('div');
+        powerUpDiv.className = 'power-up';
+        powerUpDiv.textContent = text;
+        
+        // 캔버스 좌표를 화면 좌표로 변환
+        const canvasRect = canvas.getBoundingClientRect();
+        const scaleX = canvasRect.width / canvas.width;
+        const scaleY = canvasRect.height / canvas.height;
+
+        powerUpDiv.style.left = `${canvasRect.left + x * scaleX}px`;
+        powerUpDiv.style.top = `${canvasRect.top + y * scaleY}px`;
+        powerUpDiv.style.transform = `translate(-50%, -50%)`; // 중앙 정렬
+
+        document.body.appendChild(powerUpDiv);
+
+        powerUpDiv.addEventListener('animationend', () => {
+            powerUpDiv.remove();
+        });
+    }
+
+    // 업적 체크 및 표시
+    function checkAchievements() {
+        achievementDefinitions.forEach(achievement => {
+            if (!achievementsUnlocked[achievement.id] && achievement.trigger(gameStats)) {
+                achievementsUnlocked[achievement.id] = true;
+                showAchievement(achievement.icon, achievement.name);
+                saveAchievements(); // 업적 저장
+            }
+        });
+    }
+
+    // 업적 표시 함수
+    function showAchievement(icon, text) {
+        achievementIcon.textContent = icon;
+        achievementText.textContent = text;
+        achievementsElement.style.display = 'flex'; // 보이게 함
+        achievementsElement.style.animation = 'none'; // 애니메이션 리셋
+        void achievementsElement.offsetWidth; // 리플로우 강제
+        achievementsElement.style.animation = 'achievementSlide 3s ease-in-out forwards'; // 애니메이션 다시 시작
+        
+        setTimeout(() => {
+            achievementsElement.style.display = 'none'; // 애니메이션 끝난 후 숨김
+        }, 3000);
+    }
+
+    // 캔버스 크기 조절 (반응형)
+    function resizeCanvas() {
+        const containerWidth = gameContainer.clientWidth;
+        const containerHeight = gameContainer.clientHeight;
+        
+        canvas.width = containerWidth;
+        canvas.height = containerHeight;
+        
+        // 현재 떨어뜨릴 행성의 위치를 캔버스 중앙으로 조정
+        if (currentPlanet) {
+            // dropX는 마우스/터치 위치에 따라 설정되므로, 여기서는 currentPlanet.x만 업데이트
+            // currentPlanet.x = canvas.width / 2; // 이 줄은 제거하여 중앙 고정 방지
+        }
+    }
+
+    // 별 배경 생성
+    function createStars() {
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 100; i++) { // 작은 별
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.width = star.style.height = `${Math.random() * 2 + 1}px`;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.animationDelay = `${Math.random() * 3}s`;
+            starsContainer.appendChild(star);
+        }
+        for (let i = 0; i < 5; i++) { // 유성
+            const shootingStar = document.createElement('div');
+            shootingStar.className = 'shooting-star';
+            shootingStar.style.left = `${Math.random() * 100}%`;
+            shootingStar.style.top = `${Math.random() * 100}%`;
+            shootingStar.style.animationDelay = `${Math.random() * 10}s`;
+            starsContainer.appendChild(shootingStar);
+        }
+    }
+
+    // 게임 초기화
+    function initGame() {
+        score = 0;
+        gameRunning = true;
+        planets = [];
+        gameOverStartTime = null;
+        gameStats = { totalMerges: 0, highestPlanet: 0, score: 0 };
+        achievementsUnlocked = loadAchievements(); // 저장된 업적 로드
+        
+        generateNextPlanet(); // 첫 행성 생성
+        updateScore();
+        updateNextPlanetDisplay();
+        gameOverModal.style.display = 'none'; // 게임 오버 모달 숨김
+        
+        resizeCanvas(); // 캔버스 크기 초기화
+        loadRankings(); // 랭킹 로드
+        
+        // 오디오 컨텍스트 활성화 (사용자 제스처 필요)
+        if (Tone.context.state !== 'running') {
+            document.body.addEventListener('click', () => {
+                if (Tone.context.state !== 'running') {
+                    Tone.start();
+                    console.log('Audio context started');
+                }
+            }, { once: true });
+        }
+    }
+
+    // 다음 행성 생성
+    function generateNextPlanet() {
+        // 처음 5개 행성 중 랜덤으로 생성
+        nextPlanetType = Math.floor(Math.random() * 5); 
+        // currentPlanet의 초기 x 위치는 캔버스 중앙으로 설정 (마우스 이동 전까지)
+        currentPlanet = new Planet(canvas.width / 2, planetTypes[nextPlanetType].size + 10, nextPlanetType);
+        updateNextPlanetDisplay();
+    }
+
+    // 행성 떨어뜨리기
+    function dropPlanet() {
+        if (!gameRunning || !currentPlanet) return;
+
+        // Tone.js 오디오 컨텍스트가 실행 중인지 확인하고, 아니면 시작 시도
+        if (Tone.context.state !== 'running') {
+            Tone.start().then(() => {
+                console.log('Audio context started on drop.');
+                performDrop();
+            }).catch(e => console.error("Failed to start audio context:", e));
+        } else {
+            performDrop();
+        }
+    }
+
+    function performDrop() {
+        // 현재 떨어뜨릴 행성을 행성 목록에 추가하고, 초기 속도를 줌
+        // dropX는 마우스/터치 이벤트에 의해 이미 설정되어 있음
+        currentPlanet.x = dropX; 
+        planets.push(currentPlanet);
+        playDropSound(); // 드롭 사운드 재생
+        currentPlanet = null; // 현재 행성 초기화
+
+        // 다음 행성 준비
+        generateNextPlanet();
+    }
+
+    // 게임 오버 조건 체크 함수
+    function checkGameOver() {
+        let anyPlanetAboveLine = false;
+        let anyNonSleepingPlanetAboveLine = false;
+
+        for (const planet of planets) {
+            if (planet.y - planet.size < gameOverLineY) {
+                anyPlanetAboveLine = true; // 적어도 하나의 행성이 라인 위에 있음
+                if (!planet.sleeping) {
+                    anyNonSleepingPlanetAboveLine = true; // 그리고 그 중 적어도 하나는 아직 활성화 상태 (수면 상태가 아님)
+                    break; // 활성 행성을 찾았으므로 더 이상 확인할 필요 없음
+                }
+            }
+        }
+
+        if (anyPlanetAboveLine && !anyNonSleepingPlanetAboveLine) {
+            // 라인 위에 행성이 있고, 그 행성들이 모두 수면 상태일 때 (즉, 스택이 안정적일 때)
+            if (gameOverStartTime === null) {
+                gameOverStartTime = Date.now(); // 타이머 시작
+            } else if (Date.now() - gameOverStartTime > gameOverDelay) {
+                endGame(false); // 게임 오버
+            }
+        } else {
+            // 라인 위에 행성이 없거나, 라인 위에 있는 행성 중 적어도 하나가 아직 활성 상태일 때
+            // 이 경우 타이머는 실행되지 않거나 리셋되어야 함
+            gameOverStartTime = null;
+        }
+    }
+
+    // 게임 루프
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // Clear canvas for fresh drawing
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw background gradient for the game area (always draw)
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, 'rgba(10, 10, 26, 0.9)');
+        gradient.addColorStop(0.3, 'rgba(26, 26, 74, 0.8)');
+        gradient.addColorStop(0.7, 'rgba(45, 27, 105, 0.8)');
+        gradient.addColorStop(1, 'rgba(74, 14, 94, 0.9)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        if (!gameRunning) {
+            // Game over state: only draw particles and return
+            drawParticles();
+            return;
+        }
+
+        // Draw game over line and warning text (only if game is running)
+        const warningIntensity = gameOverStartTime ? 
+            Math.sin(Date.now() * 0.01) * 0.5 + 0.5 : 0.3;
+        
+        ctx.strokeStyle = `rgba(255, 140, 0, ${0.6 + warningIntensity * 0.4})`;
+        ctx.lineWidth = gameOverStartTime ? 4 : 2;
+        ctx.beginPath();
+        ctx.setLineDash([10, 5]);
+        ctx.moveTo(0, gameOverLineY);
+        ctx.lineTo(canvas.width, gameOverLineY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        if (gameOverStartTime) {
+            // 남은 시간 표시를 제거하고 경고 메시지만 표시
+            ctx.fillStyle = `rgba(255, 140, 0, ${warningIntensity})`;
+            ctx.font = '20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`⚠️ 게임오버!`, canvas.width / 2, gameOverLineY - 10);
+        }
+
+        // Update physics for all planets
+        for (let i = 0; i < planets.length; i++) {
+            planets[i].update();
+            planets[i].handleBoundaryCollision();
+        }
+
+        // Iterative Collision Resolution
+        let mergesHappenedInIteration;
+        for (let k = 0; k < 5; k++) { // Perform several iterations for stability
+            mergesHappenedInIteration = false;
+            for (let i = 0; i < planets.length; i++) {
+                for (let j = i + 1; j < planets.length; j++) {
+                    const planet1 = planets[i];
+                    const planet2 = planets[j];
+                    if (!planet1.merged && !planet2.merged) {
+                        if (planet1.resolveCollision(planet2)) {
+                            mergesHappenedInIteration = true;
+                        }
+                    }
+                }
+            }
+            if (mergesHappenedInIteration) {
+                planets = planets.filter(p => !p.merged);
+                k = -1; // Restart the outer collision loop from 0
+            }
+        }
+        
+        // Draw all active planets
+        planets.forEach(p => p.draw());
+
+        // Draw the current dropping planet and its guide line
+        if (currentPlanet) {
+            // currentPlanet.x는 마우스/터치 이동에 따라 dropX로 이미 업데이트됨
+            
+            const guideGradient = ctx.createLinearGradient(dropX, currentPlanet.y, dropX, canvas.height);
+            guideGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+            guideGradient.addColorStop(1, 'rgba(255, 255, 255, 0.1)');
+            ctx.strokeStyle = guideGradient;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(dropX, currentPlanet.y + currentPlanet.size);
+            ctx.lineTo(dropX, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            currentPlanet.draw();
+        }
+        
+        // Update and draw particles
+        updateParticles();
+        drawParticles();
+
+        // Check game over condition
+        checkGameOver();
+    }
+
+    // 게임 종료
+    function endGame(win) {
+        if (!gameRunning) return;
+        gameRunning = false;
+        playGameOverSound(); // 게임 오버 사운드 재생
+        
+        gameOverTitle.textContent = win ? '🎉 게임 승리! 🎉' : '💀 게임 오버! 💀';
+        finalScore.textContent = score;
+        gameOverModal.style.display = 'block'; // 게임 오버 모달 표시
+        
+        saveRanking(score); // 랭킹 저장
+        loadRankings(); // 랭킹 다시 로드하여 업데이트된 목록 표시
+    }
+
+    // 게임 재시작
+    function restartGame() {
+        initGame();
+    }
+
+    // 랭킹 저장
+    function saveRanking(currentScore) {
+        const now = new Date();
+        const dateString = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
+        
+        rankings.push({ score: currentScore, date: dateString });
+        rankings.sort((a, b) => b.score - a.score); // 점수 내림차순 정렬
+        rankings = rankings.slice(0, 10); // 상위 10개만 유지
+
+        localStorage.setItem('planetMergeRankings', JSON.stringify(rankings));
+    }
+
+    // 랭킹 로드 및 표시
+    function loadRankings() {
+        const savedRankings = localStorage.getItem('planetMergeRankings');
+        if (savedRankings) {
+            rankings = JSON.parse(savedRankings);
+        } else {
+            rankings = [];
+        }
+        displayRankings();
+    }
+
+    // 랭킹 UI에 표시
+    function displayRankings() {
+        if (rankings.length === 0) {
+            rankingContainer.innerHTML = '<div class="no-records">아직 기록이 없습니다</div>';
+            return;
+        }
+
+        let tableHtml = '<table class="ranking-table"><thead><tr><th>순위</th><th>점수</th><th>날짜</th></tr></thead><tbody>';
+        rankings.forEach((record, index) => {
+            const isNewRecord = (record.score === score && index === 0 && gameRunning === false); // 방금 세운 최고 기록 강조
+            tableHtml += `<tr class="${isNewRecord ? 'new-record' : ''}">
+                            <td class="rank-number">${index + 1}</td>
+                            <td class="rank-score">${record.score}</td>
+                            <td class="rank-date">${record.date}</td>
+                          </tr>`;
+        });
+        tableHtml += '</tbody></table>';
+        rankingContainer.innerHTML = tableHtml;
+    }
+
+    // 랭킹 초기화
+    function clearRankings() {
+        // 사용자에게 확인 메시지를 표시 (모달 사용)
+        // confirm()은 iframe에서 작동하지 않으므로, 사용자 상호작용 없이 바로 초기화합니다.
+        localStorage.removeItem('planetMergeRankings');
+        rankings = [];
+        displayRankings();
+    }
+
+    // 업적 저장 및 로드
+    function saveAchievements() {
+        localStorage.setItem('planetMergeAchievements', JSON.stringify(achievementsUnlocked));
+    }
+
+    function loadAchievements() {
+        const saved = localStorage.getItem('planetMergeAchievements');
+        return saved ? JSON.parse(saved) : {};
+    }
+
+    // ----- 이벤트 리스너 -----
+    // 마우스 이동 시 드롭 위치 업데이트
+    canvas.addEventListener('mousemove', (e) => {
+        if (!gameRunning || !currentPlanet) return;
+        const rect = canvas.getBoundingClientRect();
+        dropX = e.clientX - rect.left;
+        // 행성이 캔버스 경계를 벗어나지 않도록 제한
+        dropX = Math.max(currentPlanet.size, Math.min(canvas.width - currentPlanet.size, dropX));
+    });
+
+    // 터치 이동 시 드롭 위치 업데이트
+    canvas.addEventListener('touchmove', (e) => {
+        if (!gameRunning || !currentPlanet) return;
+        e.preventDefault(); // 스크롤 방지
+        const rect = canvas.getBoundingClientRect();
+        dropX = e.touches[0].clientX - rect.left;
+        dropX = Math.max(currentPlanet.size, Math.min(canvas.width - currentPlanet.size, dropX));
+    }, { passive: false }); // passive: false로 설정하여 preventDefault() 가능하게 함
+
+    // 캔버스 클릭/터치 시 행성 떨어뜨리기
+    canvas.addEventListener('mousedown', dropPlanet);
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault(); // 스크롤 방지
+        const rect = canvas.getBoundingClientRect();
+        dropX = e.touches[0].clientX - rect.left;
+        dropX = Math.max(currentPlanet.size, Math.min(canvas.width - currentPlanet.size, dropX));
+        dropPlanet();
+    }, { passive: false });
+
+    // 스페이스바 눌렀을 때 행성 떨어뜨리기
+    document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && gameRunning) {
+            e.preventDefault(); // 스페이스바 기본 동작(스크롤) 방지
+            dropPlanet();
+        }
+    });
+
+    // 윈도우 크기 변경 시 캔버스 크기 조절
+    window.addEventListener('resize', resizeCanvas);
+
+    // 페이지 로드 완료 후 게임 초기화 및 시작
+    window.onload = function () {
+        createStars(); // 별 배경 생성
+        initAudio(); // 오디오 초기화
+        initGame(); // 게임 초기화
+        animate(); // 게임 루프 시작
+    }
+</script>
+</body>
+</html>
