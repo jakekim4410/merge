@@ -489,6 +489,13 @@
     </style>
 </head>
 <body>
+    <!-- 카카오 광고 삽입 -->
+    <ins class="kakao_ad_area"
+    data-ad-unit = "DAN-BvMndTGf4NHqUegB"
+    data-ad-width = "320"
+    data-ad-height = "100"></ins>
+    <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+    
     <div class="stars" id="stars"></div>
     <div class="nebula"></div>
     <div class="nebula"></div>
@@ -601,20 +608,20 @@
     // 게임 오버 라인 (캔버스 상단에서 Y축 위치)
     const gameOverLineY = 80;
     let gameOverStartTime = null; // 게임오버 조건 시작 시간 
-    const gameOverDelay = 3000; // 3초 동안 행성이 라인 위에 있으면 게임 오버
+    const gameOverDelay = 3000; // 3초 동안 행성이 라인 위에 있으면 게임 오버 (사용자 요청에 따라 3초로 복구)
 
     // 물리 상수들
-    const GRAVITY = 0.25; // 중력
+    const GRAVITY = 0.45; // 중력 -> 0.35에서 0.45로 증가 (더 빠르게 떨어짐)
     const AIR_RESISTANCE = 1.0; // 공기 저항 (1.0은 저항 없음)
-    const GROUND_FRICTION = 0.9; // 바닥 마찰을 높여 수평 이동을 줄임
-    const BOUNCE_DAMPING = 0.01; // 튕김 감쇠를 더 높여 충돌 시 속도 손실을 늘림 (더 적게 튕기도록)
-    const MIN_VELOCITY_THRESHOLD = 0.5; // 최소 속도 임계값 (더 빨리 멈추도록)
-    const SLEEP_THRESHOLD = 0.5; // 수면 임계값 (더 빨리 수면 모드 진입하도록)
+    const GROUND_FRICTION = 0.9; // 바닥 마찰을 높여 수평 이동을 줄임 (유지)
+    const BOUNCE_DAMPING = 0.001; // 튕김 감쇠를 더 높여 충돌 시 속도 손실을 늘림 (더 적게 튕기도록) -> 0.005에서 0.001로 감소
+    const MIN_VELOCITY_THRESHOLD = 1.0; // 최소 속도 임계값 (더 빨리 멈추도록) -> 0.8에서 1.0으로 증가
+    const SLEEP_THRESHOLD = 1.0; // 수면 임계값 (더 빨리 수면 모드 진입하도록) -> 0.8에서 1.0으로 증가
 
     // ----- 행성 데이터 (fontSize 수정됨) -----
     const planetTypes = [
         { size: 15, emoji: '⚫', name: '세레스', points: 1, fontSize: 33, color: '#666666' },
-        { size: 18, emoji: '�', name: '명왕성', points: 2, fontSize: 40, color: '#87ceeb' },
+        { size: 18, emoji: '🧊', name: '명왕성', points: 2, fontSize: 40, color: '#87ceeb' },
         { size: 21, emoji: '💎', name: '트리톤', points: 3, fontSize: 46, color: '#b0e0e6' },
         { size: 24, emoji: '🌕', name: '달', points: 4, fontSize: 53, color: '#f5f5dc' },
         { size: 27, emoji: '⚪', name: '수성', points: 5, fontSize: 60, color: '#c0c0c0' },
@@ -625,7 +632,7 @@
         { size: 78, emoji: '🔮', name: '천왕성', points: 25, fontSize: 172, color: '#40e0d0' },
         { size: 97.5, emoji: '🪐', name: '토성', points: 30, fontSize: 215, color: '#fad5a5' },
         { size: 112.5, emoji: '🌀', name: '목성', points: 50, fontSize: 248, color: '#daa520' },
-        { size: 150, emoji: '☀️', name: '태양', points: 100, fontSize: 330, color: '#ffa500' }
+        { size: 150, emoji: '☀️', points: 100, fontSize: 330, color: '#ffa500' }
     ];
 
     // 업적 정의 (콤보 업적 제거)
@@ -1196,28 +1203,25 @@
     // 게임 오버 조건 체크 함수
     function checkGameOver() {
         let anyPlanetAboveLine = false;
-        let anyNonSleepingPlanetAboveLine = false;
-
+        // 라인 위에 있는 모든 행성을 검사
         for (const planet of planets) {
+            // 현재 떨어뜨리려는 행성(currentPlanet)은 제외하고, 이미 떨어진 행성들만 대상으로 함
+            // 행성이 게임 오버 라인(gameOverLineY) 위에 있는지 확인
             if (planet.y - planet.size < gameOverLineY) {
-                anyPlanetAboveLine = true; // 적어도 하나의 행성이 라인 위에 있음
-                if (!planet.sleeping) {
-                    anyNonSleepingPlanetAboveLine = true; // 그리고 그 중 적어도 하나는 아직 활성화 상태 (수면 상태가 아님)
-                    break; // 활성 행성을 찾았으므로 더 이상 확인할 필요 없음
-                }
+                anyPlanetAboveLine = true;
+                break; // 하나라도 라인 위에 있으면 더 이상 검사할 필요 없음
             }
         }
 
-        if (anyPlanetAboveLine && !anyNonSleepingPlanetAboveLine) {
-            // 라인 위에 행성이 있고, 그 행성들이 모두 수면 상태일 때 (즉, 스택이 안정적일 때)
+        if (anyPlanetAboveLine) {
+            // 라인 위에 행성이 하나라도 있으면 타이머 시작
             if (gameOverStartTime === null) {
-                gameOverStartTime = Date.now(); // 타이머 시작
+                gameOverStartTime = Date.now(); 
             } else if (Date.now() - gameOverStartTime > gameOverDelay) {
-                endGame(false); // 게임 오버
+                endGame(false); // 타이머가 만료되면 게임 오버
             }
         } else {
-            // 라인 위에 행성이 없거나, 라인 위에 있는 행성 중 적어도 하나가 아직 활성 상태일 때
-            // 이 경우 타이머는 실행되지 않거나 리셋되어야 함
+            // 라인 위에 행성이 없으면 타이머 리셋
             gameOverStartTime = null;
         }
     }
@@ -1258,11 +1262,12 @@
         ctx.setLineDash([]);
 
         if (gameOverStartTime) {
-            // 남은 시간 표시를 제거하고 경고 메시지만 표시
+            // 남은 시간 표시
+            const timeLeft = Math.max(0, gameOverDelay / 1000 - (Date.now() - gameOverStartTime) / 1000);
             ctx.fillStyle = `rgba(255, 140, 0, ${warningIntensity})`;
             ctx.font = '20px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText(`⚠️ 게임오버!`, canvas.width / 2, gameOverLineY - 10);
+            ctx.fillText(`⚠️ ${timeLeft.toFixed(1)}초 후 게임오버!`, canvas.width / 2, gameOverLineY - 10);
         }
 
         // Update physics for all planets
