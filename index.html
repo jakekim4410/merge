@@ -13,7 +13,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #0a0a1a 0%, #1a1a4a 30%, #2d1b69 70%, #4a0e5e 100%);
@@ -37,7 +37,7 @@
             0%, 100% { background: linear-gradient(135deg, #0a0a1a 0%, #1a1a4a 30%, #2d1b69 70%, #4a0e5e 100%); }
             50% { background: linear-gradient(135deg, #1a0a2a 0%, #2a1a5a 30%, #3d2b79 70%, #5a1e6e 100%); }
         }
-        
+
         .stars {
             position: fixed;
             top: 0;
@@ -47,7 +47,7 @@
             pointer-events: none;
             z-index: -1;
         }
-        
+
         .star {
             position: absolute;
             background: white;
@@ -80,7 +80,7 @@
                 opacity: 0;
             }
         }
-        
+
         @keyframes twinkle {
             0%, 100% { opacity: 0.3; transform: scale(1); }
             50% { opacity: 1; transform: scale(1.2); }
@@ -114,7 +114,7 @@
             33% { transform: translate(20px, -30px) scale(1.1); }
             66% { transform: translate(-20px, -10px) scale(0.9); }
         }
-        
+
         h1 {
             margin: 20px 0;
             text-align: center;
@@ -129,16 +129,16 @@
         }
 
         @keyframes titleGlow {
-            0%, 100% { 
+            0%, 100% {
                 background-position: 0% 50%;
                 text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
             }
-            50% { 
+            50% {
                 background-position: 100% 50%;
                 text-shadow: 0 0 40px rgba(255, 107, 53, 0.9);
             }
         }
-        
+
         .main-content-wrapper {
             display: flex;
             justify-content: center;
@@ -148,7 +148,7 @@
             max-width: 1200px;
             margin: 0;
         }
-        
+
         .left-column {
             display: flex;
             flex-direction: column;
@@ -166,7 +166,7 @@
             margin-bottom: 1.5rem;
             font-size: 1.2rem;
         }
-        
+
         .score, .next-planet {
             background: rgba(255, 255, 255, 0.15);
             padding: 0.75rem 1.25rem;
@@ -176,13 +176,13 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
         }
-        
+
         .game-container {
             position: relative;
             border: 3px solid #4a90e2;
             border-radius: 20px;
             background: rgba(0, 0, 0, 0.4);
-            box-shadow: 
+            box-shadow:
                 0 0 40px rgba(74, 144, 226, 0.6),
                 inset 0 0 30px rgba(255, 255, 255, 0.1);
             overflow: hidden;
@@ -190,7 +190,7 @@
             max-width: 400px;
             aspect-ratio: 4 / 6; /* 캔버스 비율 유지 */
         }
-        
+
         #gameCanvas {
             display: block;
             background: transparent;
@@ -202,7 +202,7 @@
             -webkit-user-select: none;
             user-select: none;
         }
-        
+
         .controls {
             margin-top: 1.5rem;
             text-align: center;
@@ -211,7 +211,7 @@
             justify-content: center;
             gap: 1rem;
         }
-        
+
         button {
             background: linear-gradient(45deg, #4a90e2, #357abd);
             color: white;
@@ -240,16 +240,16 @@
         button:hover::before {
             left: 100%;
         }
-        
+
         button:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(74, 144, 226, 0.6);
         }
-        
+
         button:active {
             transform: translateY(-1px);
         }
-        
+
         .planet-guide {
             margin-top: 0;
             text-align: center;
@@ -263,7 +263,7 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .planet-guide h3 {
             font-size: 1.5rem;
             margin-bottom: 1rem;
@@ -272,11 +272,11 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
+
         .planet-guide p {
             margin-bottom: 0.5rem;
         }
-        
+
         .game-over {
             position: absolute;
             top: 50%;
@@ -293,7 +293,7 @@
             border: 2px solid rgba(255, 215, 0, 0.3);
             box-shadow: 0 0 50px rgba(255, 215, 0, 0.4);
         }
-        
+
         .game-over h2 {
             color: #ff6b35;
             margin-bottom: 1rem;
@@ -329,7 +329,7 @@
             border-collapse: collapse;
             font-size: 0.9rem;
         }
-        
+
         .ranking-table th, .ranking-table td {
             padding: 0.5rem 0.75rem;
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -382,7 +382,7 @@
             font-size: 0.9rem;
             text-align: left;
         }
-        
+
         .guide-table th, .guide-table td {
             padding: 0.5rem 0.75rem;
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -448,7 +448,7 @@
             color: #ffd700;
             font-weight: bold;
         }
-        
+
         /* 모바일 환경을 위한 반응형 디자인 */
         @media (max-width: 900px) {
             h1 { font-size: 2rem; }
@@ -486,31 +486,211 @@
                 font-size: 0.9em;
             }
         }
+
+        /* 상단 고정 가로형 광고 컨테이너 */
+        #kakaoAdFixedTop {
+            position: fixed; /* 화면에 고정 */
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%); /* 정확한 중앙 정렬 */
+            width: 100%;
+            max-width: 320px; /* 광고 너비에 맞춤 */
+            text-align: center; /* 내부 광고를 중앙에 배치 */
+            background-color: rgba(255, 255, 255, 0.8); /* 배경색을 주어 아래 콘텐츠가 비치지 않게 함 */
+            padding: 5px 0;
+            z-index: 1000; /* 다른 요소들 위에 표시 */
+            border-bottom: 1px solid #eee; /* 구분선 (선택 사항) */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex; /* 내부 광고를 flex로 중앙 정렬 */
+            justify-content: center;
+            align-items: center;
+            min-height: 100px; /* 광고 높이에 맞춤 (min-height로 변경) */
+            overflow: hidden; /* 광고가 컨테이너를 넘어가지 않도록 */
+        }
+
+        /* 오른쪽 고정 세로형 광고 컨테이너 */
+        #kakaoAdFixedRight {
+            position: fixed; /* 화면에 고정 */
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%); /* 정확한 세로 중앙 정렬 */
+            z-index: 1000; /* 다른 요소들 위에 표시 */
+            background-color: rgba(255, 255, 255, 0.8); /* 배경색 */
+            padding: 5px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+            display: flex; /* 내부 광고를 flex로 중앙 정렬 */
+            justify-content: center;
+            align-items: center;
+            min-width: 160px; /* 광고 너비에 맞춤 (min-width로 변경) */
+            min-height: 600px; /* 광고 높이에 맞춤 (min-height로 변경) */
+            overflow: hidden; /* 광고가 컨테이너를 넘어가지 않도록 */
+        }
+
+/* 모바일 환경에서 고정 광고를 보이도록 설정 */
+/* 일반적으로 모바일에서는 고정 광고가 콘텐츠를 가릴 수 있으므로 주의해서 사용하세요. */
+@media (max-width: 992px) {
+    #kakaoAdFixedTop {
+        display: flex; /* 상단 광고를 다시 보이게 함 */
+        /* 모바일 상단 광고에 필요한 추가 스타일 (예: 너비 조정) */
+        width: 100%;
+        max-width: 100%; /* 모바일 화면 전체 너비 사용 */
+    }
+    #kakaoAdFixedRight {
+        display: none; /* 오른쪽 세로 광고는 모바일에서 여전히 숨김 (공간 부족) */
+    }
+    body {
+        /* 상단 광고가 보일 경우, 콘텐츠가 가려지지 않도록 padding-top을 추가합니다. */
+        /* 광고 높이에 따라 조절하세요. (예: 100px 광고면 105px 정도) */
+        padding-top: 105px; /* 상단 광고 높이에 맞게 조정 */
+        padding-right: 0; /* 오른쪽 광고는 숨기므로 패딩 제거 */
+    }
+}
+
+        /* 게임 영역이 광고에 가려지지 않도록 body에 padding-top 추가 (데스크탑에서만) */
+        @media (min-width: 993px) {
+            body {
+                padding-top: 110px; /* 상단 광고 높이(100px) + 여유 공간 */
+                padding-right: 170px; /* 우측 광고 너비(160px) + 여유 공간 */
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- 카카오 광고 삽입 -->
-<div id="kakaoAdFixedTop">
-    <ins class="kakao_ad_area"
-         data-ad-unit="DAN-BvMndTGf4NHqUegB"
-         data-ad-width="320"
-         data-ad-height="100"></ins>
-</div>
-
-<div id="kakaoAdFixedRight">
-    <ins class="kakao_ad_area"
-         data-ad-unit="DAN-2tN20MdEUXO9gLYv"
-         data-ad-width="160"
-         data-ad-height="600"></ins>
-</div>
-
-<script type="text-javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
-    
     <div class="stars" id="stars"></div>
     <div class="nebula"></div>
     <div class="nebula"></div>
-    
-    
+
+    <h1>태양계 행성 합치기 게임</h1>
+
+    <div class="main-content-wrapper">
+        <div class="left-column">
+            <div class="game-info">
+                <div class="score">점수: <span id="score">0</span></div>
+                <div class="next-planet">다음 행성: <span id="nextPlanet">?</span></div>
+            </div>
+            <div class="game-container">
+                <canvas id="gameCanvas"></canvas>
+                <div class="game-over" id="gameOverScreen">
+                    <h2>게임 오버!</h2>
+                    <p>최종 점수: <span id="finalScore">0</span></p>
+                    <button id="restartButton">다시 시작</button>
+                </div>
+            </div>
+            <div class="controls">
+                <button id="resetButton">게임 초기화</button>
+                <button id="muteButton">소리 켜기/끄기</button>
+            </div>
+        </div>
+        <div class="right-column">
+            <div class="ranking" id="rankingSection">
+                <h3>명예의 전당</h3>
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>순위</th>
+                            <th>점수</th>
+                            <th>날짜</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rankingTableBody">
+                        <!-- 랭킹 데이터가 여기에 삽입됩니다 -->
+                    </tbody>
+                </table>
+                <p id="noRecordsMessage" class="no-records" style="display: none;">아직 기록된 점수가 없습니다.</p>
+            </div>
+
+            <div class="planet-guide">
+                <h3>행성 합치기 가이드</h3>
+                <p>같은 종류의 행성을 합쳐 더 큰 행성을 만드세요!</p>
+                <table class="guide-table">
+                    <thead>
+                        <tr>
+                            <th>행성</th>
+                            <th>합쳐지는 행성</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>💧</td><td>수성</td></tr>
+                        <tr><td>🔥</td><td>금성</td></tr>
+                        <tr><td>🌍</td><td>지구</td></tr>
+                        <tr><td>🚀</td><td>화성</td></tr>
+                        <tr><td>🌌</td><td>목성</td></tr>
+                        <tr><td>🪐</td><td>토성</td></tr>
+                        <tr><td>🌀</td><td>천왕성</td></tr>
+                        <tr><td>🌊</td><td>해왕성</td></tr>
+                        <tr><td>☀️</td><td>태양</td></tr>
+                        <tr><td>⭐️</td><td>초신성</td></tr>
+                    </tbody>
+                </table>
+                <p>초신성까지 도달하면 승리합니다! 화면 밖으로 행성이 넘어가면 게임 오버!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="achievements" id="achievementPopup">
+        <div class="achievement-content">
+            <span class="achievement-icon">🏆</span>
+            <span class="achievement-text" id="achievementText">업적 달성!</span>
+        </div>
+    </div>
+
+    <!-- 카카오 광고 삽입 -->
+    <!-- 상단 광고 -->
+    <div id="kakaoAdFixedTop">
+        <ins class="kakao_ad_area"
+             data-ad-unit="DAN-BvMndTGf4NHqUegB"
+             data-ad-width="320"
+             data-ad-height="100"></ins>
+    </div>
+
+    <!-- 오른쪽 광고 -->
+    <div id="kakaoAdFixedRight">
+        <ins class="kakao_ad_area"
+             data-ad-unit="DAN-2tN20MdEUXO9gLYv"
+             data-ad-width="160"
+             data-ad-height="600"></ins>
+    </div>
+
+    <!-- 카카오 광고 스크립트 -->
+    <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+
+    <script>
+        // Game JavaScript will go here
+        // ... (기존 게임 로직은 여기에 그대로 유지)
+        // 예를 들어, 별 생성 스크립트 등
+        document.addEventListener('DOMContentLoaded', () => {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 3}s`;
+                starsContainer.appendChild(star);
+            }
+
+            for (let i = 0; i < 5; i++) { // 5개의 유성 추가
+                const shootingStar = document.createElement('div');
+                shootingStar.className = 'shooting-star';
+                shootingStar.style.top = `${Math.random() * 100}%`;
+                shootingStar.style.left = `${Math.random() * 100}%`;
+                shootingStar.style.animationDelay = `${Math.random() * 10}s`;
+                shootingStar.style.animationDuration = `${Math.random() * 5 + 3}s`; // 3초에서 8초 사이
+                starsContainer.appendChild(shootingStar);
+            }
+
+            // 카카오 광고 로드 후 리프레시 (선택 사항, 필요시)
+            if (typeof KakaoAd !== 'undefined' && KakaoAd.load) {
+                setTimeout(() => {
+                    KakaoAd.load();
+                }, 100); // 페이지 로드 후 약간의 지연을 주고 로드
+            }
+        });
+    </script>
+</body>
+
     <h1>🌟 태양계 행성 합치기 🌌</h1>
     
     <div class="achievements" id="achievements">
@@ -590,6 +770,7 @@
     </div>
 
 <script>
+    
     // ----- 기본 요소 가져오기 -----
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -1468,6 +1649,4 @@
     }
 </script>
 </body>
-
 </html>
-
